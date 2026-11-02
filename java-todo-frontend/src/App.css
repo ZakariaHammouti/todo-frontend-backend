@@ -1,0 +1,26 @@
+nav {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    width: 100%;
+    padding: 20px 40px;
+    background-color: #6b6375;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+nav a:hover,
+nav a.active {
+    color: #61dafb;
+}
+
+.load-button {
+    font-size: 20px;
+    padding: 15px 30px;
+    cursor: pointer;
+}
