@@ -1,7 +1,4 @@
 import {useState} from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
 import axios from "axios";
@@ -12,21 +9,49 @@ import Doing from "./components/Doing.tsx";
 import Done from "./components/Done.tsx";
 import Overview from "./components/Overview.tsx";
 
-import type {Task} from "./types/Type.ts";
+import type {Task, TaskStatus} from "./types/Type.ts";
 
 function App() {
 
     const [tasks, setTasks] = useState<Task[]>([]);
 
     function handleButton() {
-        console.log("handle Button");
+
         axios.get("/api/todo")
             .then((response) => {
                 console.log(response.data);
                 setTasks(response.data);
             })
             .catch((error) => {
-                console.log("Error");
+                console.log("Error beim Laden: ", error);
+            });
+    }
+
+    function changeStatus(taskId: string, newStatus: TaskStatus) {
+        const task = tasks.find(task => task.id === taskId);
+
+        if (!task) {
+            return;
+        }
+
+        const updatedTask = {
+            id: task.id,
+            description: task.description,
+            status: newStatus
+        };
+
+        axios.put<Task>(`/api/todo/${taskId}/update`, updatedTask)
+            .then((response) => {
+                setTasks(prevTasks =>
+                    prevTasks.map(task =>
+                        task.id === taskId
+                            ? response.data
+                            : task
+                    )
+                );
+            })
+            .catch((error) => {
+                console.log("Fehler beim Aktualisieren", error);
             });
     }
 
@@ -43,15 +68,16 @@ function App() {
 
                     <Route path={"/todo"} element={<ToDos
                         tasks={tasks}
-                        setTasks={setTasks}/>}/>
+                        changeStatus={changeStatus}/>}/>
 
                     <Route path={"/doing"} element={<Doing
                         tasks={tasks}
-                        setTasks={setTasks}/>}/>
+                        changeStatus={changeStatus}/>}/>
 
                     <Route path={"/done"} element={<Done
                         tasks={tasks}
-                        setTasks={setTasks}/>}/>
+                        setTasks={setTasks}
+                        changeStatus={changeStatus}/>}/>
 
                 </Routes>
 

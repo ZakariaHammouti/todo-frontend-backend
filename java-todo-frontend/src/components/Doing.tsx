@@ -1,42 +1,13 @@
-import type {Task} from "../types/Type";
-import axios from "axios";
+import type {Task, TaskStatus} from "../types/Type.ts";
 
 type Props = {
     tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+    changeStatus: (taskId: string, newStatus: TaskStatus) => void;
 };
 
-export default function Doing({tasks, setTasks}: Props) {
+export default function Doing({tasks, changeStatus}: Props) {
 
     const doingTasks = tasks.filter(task => task.status === "IN_PROGRESS");
-
-    function changeStatus(taskId: string, newStatus: Task["status"]) {
-        const task = tasks.find(task => task.id === taskId);
-
-        if (!task) {
-            return;
-        }
-
-        const updatedTask = {
-            id: task.id,
-            description: task.description,
-            status: newStatus
-        };
-
-        axios.put<Task>(`/api/todo/${taskId}/update`, updatedTask)
-            .then((response) => {
-                setTasks(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === taskId
-                            ? response.data
-                            : task
-                    )
-                );
-            })
-            .catch((error) => {
-                console.log("Fehler beim Aktualisieren", error);
-            });
-    }
 
     return (
         <>

@@ -2,20 +2,19 @@ import {useState} from "react";
 import axios from "axios";
 import type {SubmitEvent} from "react";
 import '../styles/Overview.css'
-import type {Dispatch} from "react";
-import type {SetStateAction} from "react";
-
+import {useNavigate} from "react-router";
 import type {Task} from "../types/Type.ts";
 
 type Props = {
     tasks: Task[];
-    setTasks: Dispatch<SetStateAction<Task[]>>;
+    setTasks: (tasks: Task[]) => void;
 };
 
 export default function Overview({tasks, setTasks}: Props) {
 
     const [error, setError] = useState("");
     const [description, setDescription] = useState("");
+    const navigate = useNavigate();
 
     function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
         event.preventDefault();
@@ -24,12 +23,14 @@ export default function Overview({tasks, setTasks}: Props) {
             description: description,
             status: "OPEN"
         }).then(response => {
-            setTasks(prevTasks => [...prevTasks, response.data]);
+            //füge respose data in die Liste ein
+            const newTasks = tasks.concat(response.data);
+            setTasks(newTasks);
             setError("");
-            console.log(tasks);
             setDescription("");
+            navigate("/todo");
         }).catch((error) => {
-            setError("Task konnte nicht gespeichert werden.");
+            setError(" Task konnte nicht gespeichert werden:" + error);
         });
     }
 
@@ -49,7 +50,7 @@ export default function Overview({tasks, setTasks}: Props) {
 
                 <button type="submit">Hinzufügen</button>
             </form>
-
+            {error && <p>{error}</p>}
             {tasks.map(task => (
                 <section className="task-card" key={task.id}>
                     <p>Aufgabe: {task.description}</p>

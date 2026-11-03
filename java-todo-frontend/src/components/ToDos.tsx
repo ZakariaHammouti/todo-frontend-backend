@@ -1,44 +1,13 @@
-import type {Task} from "../types/Type.ts";
-import axios from "axios";
-import {useState} from "react";
+import type {Task, TaskStatus} from "../types/Type.ts";
 
 type Props = {
     tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+    changeStatus: (taskId: string, newStatus: TaskStatus) => void;
 };
 
-export default function Todos({tasks, setTasks}: Props) {
+export default function Todos({tasks, changeStatus}: Props) {
 
     const openTasks = tasks.filter(task => task.status === "OPEN");
-
-    function moveToDoing(taskId: string) {
-        const task = tasks.find(task => task.id === taskId);
-
-        if (!task) {
-            return;
-        }
-
-        const updatedTask = {
-            id: task.id,
-            description: task.description,
-            status: "IN_PROGRESS"
-        };
-
-        axios.put<Task>(`/api/todo/${taskId}/update`, updatedTask)
-            .then((response) => {
-                setTasks(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === taskId
-                            ? response.data
-                            : task
-                    )
-                );
-            })
-            .catch((error) => {
-                console.log("Fehler beim Aktualisieren", error);
-            });
-    }
-
 
     return (
         <>
@@ -49,7 +18,7 @@ export default function Todos({tasks, setTasks}: Props) {
                     <p>Aufgabe: {task.description}</p>
                     <p>Status: Offen</p>
 
-                    <button onClick={() => moveToDoing(task.id)}>
+                    <button onClick={() => changeStatus(task.id, "IN_PROGRESS")}>
                         Task Bearbeiten
                     </button>
 

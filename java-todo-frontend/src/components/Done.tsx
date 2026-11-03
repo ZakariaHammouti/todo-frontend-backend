@@ -1,55 +1,29 @@
-import type {Task} from "../types/Type";
 import axios from "axios";
+import type {Task, TaskStatus} from "../types/Type.ts";
 
-type Props = {
+export type Props = {
     tasks: Task[];
-    setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
+    setTasks: (tasks: Task[]) => void;
+    changeStatus: (taskId: string, newStatus: TaskStatus) => void;
 };
 
-export default function Done({tasks, setTasks}: Props) {
+export default function Done({tasks, setTasks, changeStatus}: Props) {
 
     const doneTasks = tasks.filter(task => task.status === "DONE");
-
-    function changeStatus(taskId: string, newStatus: Task["status"]) {
-        const task = tasks.find(task => task.id === taskId);
-
-        if (!task) {
-            return;
-        }
-
-        const updatedTask = {
-            id: task.id,
-            description: task.description,
-            status: newStatus
-        };
-
-        axios.put<Task>(`/api/todo/${taskId}/update`, updatedTask)
-            .then((response) => {
-                setTasks(prevTasks =>
-                    prevTasks.map(task =>
-                        task.id === taskId
-                            ? response.data
-                            : task
-                    )
-                );
-            })
-            .catch((error) => {
-                console.log("Fehler beim Aktualisieren", error);
-            });
-    }
 
     function deleteTask(taskId: string) {
         axios.delete(`/api/todo/${taskId}`)
             .then(() => {
-                setTasks(prevTasks =>
-                    prevTasks.filter(task => task.id !== taskId)
+                const newTasksListAfterRemoving = tasks.filter(
+                    task => task.id !== taskId
                 );
+
+                setTasks(newTasksListAfterRemoving);
             })
             .catch((error) => {
                 console.log("Fehler beim Löschen", error);
             });
     }
-
 
     return (
         <>
